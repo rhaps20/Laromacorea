@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/homeButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Home"/>
+
+    <Button
+        android:id="@+id/noticeButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Notice"/>
+
+    <Button
+        android:id="@+id/clubButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Club"/>
+
+    <Button
+        android:id="@+id/squadButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Squad"/>
+
+    <Button
+        android:id="@+id/matchButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Match"/>
+
+    <Button
+        android:id="@+id/calcioButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Calcio"/>
+
+    <Button
+        android:id="@+id/freeButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Free"/>
+
+
+    <Button
+        android:id="@+id/specialButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Special"/>
+
+    <Button
+        android:id="@+id/mediaButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Media"/>
+
+    <Button
+        android:id="@+id/iconButton_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Icon"/>
+</LinearLayout>
