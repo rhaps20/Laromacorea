@@ -1,4 +1,4 @@
-package com.example.keehl.laromacorea;
+package com.keehl.laromacorea;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
@@ -9,22 +9,9 @@ public class ContentViewPagerAdapter extends FragmentStatePagerAdapter {
 
     private Context mContext = null ;
 
-    ContentActivity contentActivity;
-    CustomViewPager viewPager;
 
     ContentViewPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
-    }
-
-    ContentViewPagerAdapter(FragmentManager fragmentManager, ContentActivity contentActivity) {
-        super(fragmentManager);
-        this.contentActivity = contentActivity;
-    }
-
-    ContentViewPagerAdapter(FragmentManager fragmentManager, ContentActivity contentActivity, CustomViewPager viewPager) {
-        super(fragmentManager);
-        this.contentActivity = contentActivity;
-        this.viewPager = viewPager;
     }
 
     @Override
@@ -34,7 +21,9 @@ public class ContentViewPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        return PageFragment.create(position, contentActivity.getHtmlPageUrl());
+        PageFragment fragment = PageFragment.create(position);
+        fragment.setUserVisibleHint(true);
+        return fragment;
     }
 
     @Override

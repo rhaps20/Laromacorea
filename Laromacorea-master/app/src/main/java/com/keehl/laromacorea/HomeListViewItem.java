@@ -1,4 +1,4 @@
-package com.example.keehl.laromacorea;
+package com.keehl.laromacorea;
 
 public class HomeListViewItem {
     private String number;

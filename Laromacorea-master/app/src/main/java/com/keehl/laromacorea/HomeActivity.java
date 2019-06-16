@@ -1,6 +1,8 @@
-package com.example.keehl.laromacorea;
+package com.keehl.laromacorea;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -15,7 +17,8 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
+import android.widget.Toast;
+;
 import com.navdrawer.SimpleSideDrawer;
 
 import org.jsoup.Connection;
@@ -27,8 +30,6 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.jsoup.nodes.Document.OutputSettings.Syntax.html;
-
 public class HomeActivity extends Activity implements View.OnClickListener {
     private SimpleSideDrawer slideMenu;
     private SimpleSideDrawer slideMatch;
@@ -39,13 +40,15 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     private Button homeButton_menu;
     private Button noticeButton_menu;
     private Button squadButton_menu;
-    private Button clubutton_menu;
     private Button matchButton_menu;
     private Button calcioButton_menu;
     private Button freeButton_menu;
     private Button specialButton_menu;
     private Button mediaButton_menu;
-    private Button iconButton_menu;
+
+    private Button leagueTableButton;
+    private Button personalTableButton;
+    private Button nextMatchButton;
 
     private HomeListViewAdapter listViewAdapter;
     private TextView noticeTitle;
@@ -95,6 +98,10 @@ public class HomeActivity extends Activity implements View.OnClickListener {
     private ArrayList<ContentsData> specialList;
     private ArrayList<ContentsData> mediaList;
 
+
+    private GetUserIdTask getUserIdTask;
+    private GetLeagueTable getLeagueTable;
+    private GetPersonalTable getPersonalTable;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,7 +141,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         slideMatch = new SimpleSideDrawer(this);
         slideMatch.setRightBehindContentView(R.layout.slide_game);
 
-        mainWebView = (WebView)findViewById(R.id.mainWebView);
+    //    mainWebView = (WebView)findViewById(R.id.mainWebView);
         matchInfo = (WebView)findViewById(R.id.matchInfo);
 
         homeButton_menu = (Button)findViewById(R.id.homeButton_menu);
@@ -142,9 +149,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         noticeButton_menu = (Button)findViewById(R.id.noticeButton_menu);
         noticeButton_menu.setOnClickListener(this);
         squadButton_menu= (Button)findViewById(R.id.squadButton_menu);
-        squadButton_menu.setOnClickListener(this);;
-        clubutton_menu = (Button)findViewById(R.id.clubButton_menu);
-        clubutton_menu.setOnClickListener(this);
+        squadButton_menu.setOnClickListener(this);
         matchButton_menu = (Button)findViewById(R.id.matchButton_menu);
         matchButton_menu.setOnClickListener(this);
         calcioButton_menu = (Button)findViewById(R.id.calcioButton_menu);
@@ -155,9 +160,13 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         specialButton_menu.setOnClickListener(this);
         mediaButton_menu = (Button)findViewById(R.id.mediaButton_menu);
         mediaButton_menu.setOnClickListener(this);
-        iconButton_menu = (Button)findViewById(R.id.iconButton_menu);
-        iconButton_menu.setOnClickListener(this);
 
+        leagueTableButton = findViewById(R.id.leagueTable);
+        leagueTableButton.setOnClickListener(this);
+        personalTableButton = findViewById(R.id.personalTable);
+        personalTableButton.setOnClickListener(this);
+        nextMatchButton = findViewById(R.id.nextMatch);
+        nextMatchButton.setOnClickListener(this);
 
         noticeList = new ArrayList<>();
         clubList = new ArrayList<>();
@@ -180,6 +189,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         noticeListView = (ListView)findViewById(R.id.listview1);
         noticeTitle = (TextView)findViewById(R.id.boardTitle1);
         noticeTitle.setBackgroundColor(Color.LTGRAY);
+        noticeTitle.setOnClickListener(this);
         noticeListView.setAdapter(noticeListViewAdapter);
         ItemClickListener noticeListener = new ItemClickListener();
         noticeListener.setBoardId("notice");
@@ -189,6 +199,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         matchListViewAdapter.setMode(HomeListViewAdapter.HOME_MODE);
         matchListView = (ListView)findViewById(R.id.listview4);
         matchTitle = (TextView)findViewById(R.id.boardTitle4);
+        matchTitle.setOnClickListener(this);
         matchTitle.setBackgroundColor(Color.LTGRAY);
         matchListView.setAdapter(matchListViewAdapter);
 
@@ -202,6 +213,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         calcioListView = (ListView)findViewById(R.id.listview5);
         calcioTitle = (TextView)findViewById(R.id.boardTitle5);
         calcioTitle.setBackgroundColor(Color.LTGRAY);
+        calcioTitle.setOnClickListener(this);
         calcioListView.setAdapter(calcioListViewAdapter);
 
         ItemClickListener calcioListener = new ItemClickListener();
@@ -212,6 +224,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         freeListViewAdapter.setMode(HomeListViewAdapter.HOME_MODE);
         freeListView = (ListView)findViewById(R.id.listview6);
         freeTitle = (TextView)findViewById(R.id.boardTitle6);
+        freeTitle.setOnClickListener(this);
         freeTitle.setBackgroundColor(Color.LTGRAY);
         freeListView.setAdapter(freeListViewAdapter);
 
@@ -225,6 +238,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         specialListView = (ListView)findViewById(R.id.listview7);
         specialTitle = (TextView)findViewById(R.id.boardTitle7);
         specialTitle.setBackgroundColor(Color.LTGRAY);
+        specialTitle.setOnClickListener(this);
         specialListView.setAdapter(specialListViewAdapter);
 
         ItemClickListener specialListener = new ItemClickListener();
@@ -235,6 +249,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         mediaListViewAdapter.setMode(HomeListViewAdapter.HOME_MODE);
         mediaListView = (ListView)findViewById(R.id.listview8);
         mediaTitle = (TextView)findViewById(R.id.boardTitle8);
+        mediaTitle.setOnClickListener(this);
         mediaTitle.setBackgroundColor(Color.LTGRAY);
         mediaListView.setAdapter(mediaListViewAdapter);
 
@@ -244,6 +259,15 @@ public class HomeActivity extends Activity implements View.OnClickListener {
 
         readData = new MAsyncTask();
         readData.execute();
+
+        getUserIdTask = new GetUserIdTask();
+        getUserIdTask.execute();
+
+        getLeagueTable = new GetLeagueTable();
+        getLeagueTable.execute();
+
+        getPersonalTable = new GetPersonalTable();
+        getPersonalTable.execute();
     }
 
     @Override
@@ -257,7 +281,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 break;
             case R.id.matchButton_main:
             //    slideMatch.toggleRightDrawer();
-                new MatchDialog(this,DataContainer.matchInfoHtml).show();
+                slideMatch.toggleRightDrawer();;
                 break;
             case R.id.homeButton_menu:
                 it = new Intent(this, HomeActivity.class);
@@ -270,28 +294,10 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 break;
             case R.id.noticeButton_menu:
                 it = new Intent(this, BoardActivity.class);
-
-                /*
-                  htmlPageUrl = null;
-                title = null;
-                sessionId = null;
-            } else {
-                htmlPageUrl = extra.getString("url");
-                title = extra.getString("text");
-                sessionId = extra.getString("sessionId");
-                 */
                 it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=notice");
                 it.putExtra("sessionId", sessionId);
                 it.putExtra("text", "Notice");
-                startActivity(it);
-                finish();
-                break;
-            case R.id.clubButton_menu:
-                it = new Intent(this, BoardActivity.class);
-                it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=club");
-                it.putExtra("sessionId", sessionId);
-                it.putExtra("text", "Club");
-
+                it.putExtra("page", 1);
                 startActivity(it);
                 finish();
                 break;
@@ -300,6 +306,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=squad");
                 it.putExtra("sessionId", sessionId);
                 it.putExtra("text", "Squad");
+                it.putExtra("page", 1);
                 startActivity(it);
                 finish();
                 break;
@@ -308,6 +315,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=1213match");
                 it.putExtra("sessionId", sessionId);
                 it.putExtra("text", "Match");
+                it.putExtra("page", 1);
                 startActivity(it);
                 finish();
                 break;
@@ -316,6 +324,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=calcio");
                 it.putExtra("sessionId", sessionId);
                 it.putExtra("text", "Calcio");
+                it.putExtra("page", 1);
                 startActivity(it);
                 finish();
                 break;
@@ -325,6 +334,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=free2");
                 it.putExtra("sessionId", sessionId);
                 it.putExtra("text", "Free");
+                it.putExtra("page", 1);
                 startActivity(it);
                 finish();
                 // finish();
@@ -334,6 +344,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=sp");
                 it.putExtra("sessionId", sessionId);
                 it.putExtra("text", "Special");
+                it.putExtra("page", 1);
                 startActivity(it);
                 finish();
                 break;
@@ -342,18 +353,114 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                 it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=media");
                 it.putExtra("sessionId", sessionId);
                 it.putExtra("text", "Media");
-                startActivity(it);
-                finish();
-                break;
-            case R.id.iconButton_menu:
-                it = new Intent(this, BoardActivity.class);
-                it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=icon");
-                it.putExtra("sessionId", sessionId);
-                it.putExtra("text", "Icon");
+                it.putExtra("page", 1);
                 startActivity(it);
                 finish();
                 break;
 
+            case R.id.leagueTable:
+                new MatchDialog(this, DataContainer.leagueTableHtml).show();
+                break;
+            case R.id.personalTable:
+                new PersonalTableDialog(this, DataContainer.playerInfoHtml).show();
+                break;
+            case R.id.nextMatch:
+                new NextMatchDialog(this, DataContainer.matchInfoHtml).show();
+                break;
+            case R.id.boardTitle1:
+                it = new Intent(this, BoardActivity.class);
+                it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=notice");
+                it.putExtra("sessionId", sessionId);
+                it.putExtra("text", "Notice");
+                it.putExtra("page", 1);
+                startActivity(it);
+                finish();
+                break;
+            case R.id.boardTitle4:
+                it = new Intent(this, BoardActivity.class);
+                it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=1213match");
+                it.putExtra("sessionId", sessionId);
+                it.putExtra("text", "Match");
+                it.putExtra("page", 1);
+                startActivity(it);
+                finish();
+                break;
+            case R.id.boardTitle5:
+                it = new Intent(this, BoardActivity.class);
+                it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=calcio");
+                it.putExtra("sessionId", sessionId);
+                it.putExtra("text", "Calcio");
+                it.putExtra("page", 1);
+                startActivity(it);
+                finish();
+                break;
+            case R.id.boardTitle6:
+                it = new Intent(this, BoardActivity.class);
+                it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=free2");
+                it.putExtra("sessionId", sessionId);
+                it.putExtra("text", "Free");
+                it.putExtra("page", 1);
+                startActivity(it);
+                finish();
+                break;
+            case R.id.boardTitle7:
+                it = new Intent(this, BoardActivity.class);
+                it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=sp");
+                it.putExtra("sessionId", sessionId);
+                it.putExtra("text", "Special");
+                it.putExtra("page", 1);
+                startActivity(it);
+                finish();
+                break;
+            case R.id.boardTitle8:
+                it = new Intent(this, BoardActivity.class);
+                it.putExtra("url", "http://www.laromacorea.com/bbs/zboard.php?id=media");
+                it.putExtra("sessionId", sessionId);
+                it.putExtra("text", "Media");
+                it.putExtra("page", 1);
+                startActivity(it);
+                finish();
+                break;
+        }
+    }
+    public class GetUserIdTask extends AsyncTask<Void, Void, Void>{
+        private ProgressDialog pDialog;
+        private int i = 0;
+        private String str;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(HomeActivity.this);
+
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... integers) {
+            try {
+                Document doc = Jsoup.connect(htmlPageUrl).cookie("PHPSESSID", sessionId).get();
+/********************************************************************/
+
+                Elements userInfo = doc.getElementsByTag("b");
+                UserInfo.userId = userInfo.get(0).html();
+
+                UserInfo.userId = UserInfo.userId.split("<b>")[1].split("</b>")[0];
+            } catch (Exception ex) {
+
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... params) {
+
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            pDialog.cancel();
         }
     }
 
@@ -364,7 +471,9 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pDialog = new ProgressDialog(getApplicationContext());
+            pDialog = new ProgressDialog(HomeActivity.this);
+
+            pDialog.show();
         }
         public void setBoardId(String boardId) {
             this.boardId = boardId;
@@ -380,14 +489,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
                         .cookie("PHPSESSID", "sessionId").request();
                 Document matchDoc = Jsoup.connect(htmlPageUrl).get();
                 Elements matchInfo = matchDoc.select("td[width=204]");
-            /*
-                Elements userInfo = matchDoc.select("td[width=130]");
 
-                for (Element ele : userInfo) {
-                    htmlUserInfo += ele.html();
-                    userInfoStr += ele.text();
-                }
-*/
                 for (Element ele : matchInfo ) {
                     htmlTemp += ele.html();
                 }
@@ -458,8 +560,6 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             if(mediaList.size() > 0)mediaList.remove(0);
 
 
-
-
             return null;
         }
 
@@ -474,10 +574,11 @@ public class HomeActivity extends Activity implements View.OnClickListener {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
 
-            mainWebView.loadDataWithBaseURL(null, htmlUserInfo, "text/html", "utf-8", null);
+       //     mainWebView.loadDataWithBaseURL(null, htmlUserInfo, "text/html", "utf-8", null);
 
             String tempStr;
             for (int i = 0; i < noticeList.size(); i++) {
+                if (i == 0) UserInfo.noticeBoardLastPost = getLastPostNum(noticeList.get(i).url);
                 tempStr = getContentsFromUrl(noticeList.get(i).str);
                 noticeList.get(i).str = tempStr;
                 ContentsData contentsData = new ContentsData();
@@ -491,6 +592,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             }
 
             for (int i = 0; i < matchList.size(); i++) {
+                if (i == 0) UserInfo.matchBoardLastPost = getLastPostNum(matchList.get(i).url);
                 tempStr = getContentsFromUrl(matchList.get(i).str);
                 matchList.get(i).str = tempStr;
                 if (tempStr.equals("") == false && tempStr.equals("Match") == false) {
@@ -504,6 +606,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             }
 
             for (int i = 0; i < calcioList.size(); i++) {
+                if (i == 0) UserInfo.calcioBoardLastPost = getLastPostNum(calcioList.get(i).url);
                 tempStr = getContentsFromUrl(calcioList.get(i).str);
                 calcioList.get(i).str = tempStr;
                 if (tempStr.equals("") == false && tempStr.equals("Calcio") == false) {
@@ -518,6 +621,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             }
 
             for (int i = 0; i < freeList.size(); i++) {
+                if (i == 0) UserInfo.freeBoardLastPost = getLastPostNum(freeList.get(i).url);
                 tempStr = getContentsFromUrl(freeList.get(i).str);
                 freeList.get(i).str = tempStr;
                 if (tempStr.equals("") == false && tempStr.equals("Free") == false) {
@@ -533,6 +637,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             }
 
             for (int i = 0; i < specialList.size(); i++) {
+                if (i == 0) UserInfo.specialBoardLastPost = getLastPostNum(specialList.get(i).url);
                 tempStr = getContentsFromUrl(specialList.get(i).str);
                 specialList.get(i).str = tempStr;
                 if (tempStr.equals("") == false && tempStr.equals("Special") == false) {
@@ -547,6 +652,7 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             }
 
             for (int i = 0; i < mediaList.size(); i++) {
+                if (i == 0) UserInfo.mediaBoardLastPost = getLastPostNum(mediaList.get(i).url);
                 tempStr = getContentsFromUrl(mediaList.get(i).str);
                 mediaList.get(i).str = tempStr;
                 if (tempStr.equals("") == false && tempStr.equals("Media") == false) {
@@ -568,17 +674,117 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             setListViewHeightBasedOnChildren(specialListView);
             setListViewHeightBasedOnChildren(mediaListView);
 
-            matchInfo.loadData(htmlTemp, "text/html", "UTF-8");
+        //    matchInfo.loadData(htmlTemp, "text/html", "UTF-8");
         //    pDialog.cancel();
+            pDialog.cancel();
         }
 
 
     }
+    /*league information*/
+
+    public class GetLeagueTable extends AsyncTask<Void, Void, Void>{
+        private ProgressDialog pDialog;
+        private String leaugeTable = "https://serieamania.com/";
+        private int i = 0;
+        private String str;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(HomeActivity.this);
+
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... integers) {
+            try {
+                Document doc = Jsoup.connect(leaugeTable).get();
+/********************************************************************/
+                Elements ele = doc.select("table[class=standings_table box_shadow_3]").select("tbody").select("tr");
+
+                DataContainer.leagueTableHtml = ele.html();
+            } catch (Exception ex) {
+
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... params) {
+
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            pDialog.cancel();
+        }
+    }
+
+
+    public class GetPersonalTable extends AsyncTask<Void, Void, Void>{
+        private ProgressDialog pDialog;
+        private String personalTable = "https://sports.news.naver.com/wfootball/record/index.nhn?category=seria&tab=player";
+        private String personalTableHtml = "";
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(HomeActivity.this);
+
+            pDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... integers) {
+            try {
+                Document doc = Jsoup.connect(personalTable).get();
+/********************************************************************/
+                Elements total = doc.select("div[id=wfootballPlayerRecordBody]")
+                        .select("table").select("tbody");
+
+                Elements rows = total.select("tr");
+
+                int size = rows.size();
+
+
+                personalTableHtml = "<h2 style=\"text-align: center;\"><b>Personal Record</b></h2>";
+                personalTableHtml += "<br><br><br>";
+
+                for (int i = 0; i < size; i++) {
+                    Elements elements = rows.get(i).select("td");
+                    for (int j = 0; j < 5; j++) {
+                        if (j == 0) personalTableHtml += "<b>";
+                        personalTableHtml += elements.get(j).text() + " ";
+                        if (j == 0) personalTableHtml += "</b>";
+                    }
+                    personalTableHtml += "<br><br>";
+                }
+
+
+            } catch (Exception ex) {
+
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... params) {
+
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            pDialog.cancel();
+            DataContainer.playerInfoHtml = personalTableHtml;
+        }
+    }
     public String getContentsFromUrl(String url) {
-    //    String[] text = url.split(new String("\\("));
-   //    String[] returnText = text[1].split(new String("\\)"));
-    //    returnText[0] += comments;
-    //    return returnText[0];
+
         char[] arrayOfChar = url.toCharArray();
 
         int i = 0;
@@ -658,9 +864,38 @@ public class HomeActivity extends Activity implements View.OnClickListener {
             finish();
         }
     }
+    int i = 0;
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+    //    super.onBackPressed();
+        i++;
+        if (i >= 2) {
+            super.onBackPressed();
+            android.os.Process.killProcess(android.os.Process.myPid());
+            Utils.showToast(this, "어플리케이션을 종료합니다.", Toast.LENGTH_LONG);
+        } else {
+            Utils.showToast(this, "빠르게 두번 터치하면 종료합니다.", Toast.LENGTH_LONG);
+        }
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(3000);
+                    i = 0;
+                } catch(Exception ex) {
+                    Log.d("Runnable", ex.getMessage());
+                }
+
+            }
+        }).start();
+    }
+
+    public int getLastPostNum(String url) {
+        String test = url.split("no=")[1];
+        test = test.split("\\(")[0];
+
+        int postNum = Integer.parseInt(test);
+
+        return postNum;
     }
 }

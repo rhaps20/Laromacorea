@@ -1,4 +1,4 @@
-package com.example.keehl.laromacorea;
+package com.keehl.laromacorea;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;
@@ -53,10 +53,10 @@ public class CustomViewPager extends ViewPager {
             try {
                 float diffX = event.getX() - initialXValue;
                 if (diffX > 0 && direction == SwipeDirection.right) {
-                    contentActivity.moveRight();
+                //    contentActivity.moveRight();
                     return false;
                 } else if (diffX < 0 && direction == SwipeDirection.left) {
-                    contentActivity.moveLeft();
+                 //    contentActivity.moveLeft();
                     // swipe from right to left detected
                     return false;
                 }

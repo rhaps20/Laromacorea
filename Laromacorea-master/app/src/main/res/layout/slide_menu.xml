@@ -17,12 +17,6 @@
         android:text="Notice"/>
 
     <Button
-        android:id="@+id/clubButton_menu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Club"/>
-
-    <Button
         android:id="@+id/squadButton_menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,10 +52,4 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Media"/>
-
-    <Button
-        android:id="@+id/iconButton_menu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Icon"/>
 </LinearLayout>

@@ -1,4 +1,4 @@
-package com.example.keehl.laromacorea;
+package com.keehl.laromacorea;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
+
 
 
 public class ProgressDialog  extends Dialog {
@@ -23,7 +24,6 @@ public class ProgressDialog  extends Dialog {
 
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         //  getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        lp.alpha = 0.0f;
         lp.gravity = Gravity.CENTER;
         getWindow().setAttributes(lp);
 
@@ -41,7 +41,7 @@ public class ProgressDialog  extends Dialog {
 
 
         @Override
-        protected Void doInBackground(java.lang.Void... voids) {
+        protected Void doInBackground(Void... voids) {
 
             return null;
         }

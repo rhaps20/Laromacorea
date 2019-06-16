@@ -1,9 +1,10 @@
-package com.example.keehl.laromacorea;
+package com.keehl.laromacorea;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Gravity;
@@ -13,8 +14,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 
 
@@ -39,7 +42,7 @@ public class HomeListViewAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (mode == 3) {
+        if (mode == REPLY_MODE) {
             final int pos = position;
             final Context context = parent.getContext();
 
@@ -68,16 +71,22 @@ public class HomeListViewAdapter extends BaseAdapter {
                 else times += temp.charAt(i);
             }
 
-            String imageUrl = item.getImageUrl();
-            new DownloadImageTask((ImageView)convertView.findViewById(R.id.userIcon))
-                    .execute(imageUrl);
 
-            userIcon.getLayoutParams().height = 50;
+            String url = item.getImageUrl();
+
+            if (url != null && !url.equals("")) {
+                new DownloadImageTask(userIcon)
+                        .execute(url);
+                userIcon.getLayoutParams().height = 50;
+            } else if (url.equals("")) {
+                userIcon.getLayoutParams().height = 0;
+            }
+
             idTv.setText(item.getUserId());
             contentTv.setText(contents);
             timeTv.setText(times);
 
-        } else if (mode == 2) {
+        } else if (mode == BOARD_MODE) {
             final int pos = position;
             final Context context = parent.getContext();
 
@@ -90,8 +99,8 @@ public class HomeListViewAdapter extends BaseAdapter {
             TextView numTv = (TextView) convertView.findViewById(R.id.number);
         //    numTv.setGravity(Gravity.LEFT);
             TextView titleTv = (TextView) convertView.findViewById(R.id.title);
+            titleTv.setTypeface(null, Typeface.BOLD);
             titleTv.setGravity(Gravity.LEFT);
-
             ImageView userIcon = (ImageView) convertView.findViewById(R.id.userIcon);
             TextView userIdTv = (TextView) convertView.findViewById(R.id.userId);
             userIdTv.setGravity(Gravity.LEFT);
@@ -112,14 +121,24 @@ public class HomeListViewAdapter extends BaseAdapter {
 
             titleTv.setText(item.getTitle() + "   " + item.getContents().comments);
 
-            new DownloadImageTask((ImageView)convertView.findViewById(R.id.userIcon))
-                    .execute(item.getImageUrl());
+            String url = item.getImageUrl();
 
-            userIcon.getLayoutParams().height = 50;
+
+            if (url != null) {
+
+            //    DownloadImageTask download;
+            //    download = new DownloadImageTask(userIcon);
+            //    download.execute(url);
+            //    while (!download.getCheck());
+            //    userIcon.getLayoutParams().height = 35  ;
+            }
+
+
+
             userIdTv.setText(item.getUserId());
             dateTv.setText(item.getDate());
             viewsTv.setText(item.getViews());
-        } else if (mode == 1) {
+        } else if (mode == HOME_MODE) {
             final int pos = position;
             final Context context = parent.getContext();
 
@@ -172,8 +191,8 @@ public class HomeListViewAdapter extends BaseAdapter {
 
 
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
+        private ImageView bmImage;
+        private boolean check = false;
         public DownloadImageTask(ImageView bmImage) {
             this.bmImage = bmImage;
         }
@@ -182,15 +201,19 @@ public class HomeListViewAdapter extends BaseAdapter {
             String urldisplay = urls[0];
             Bitmap mIcon11 = null;
             try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
+                InputStream in = new URL(urldisplay).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
+                check = true;
             } catch (Exception e) {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
+            //    return null;
             }
             return mIcon11;
         }
-
+        public boolean getCheck() {
+            return check;
+        }
         protected void onPostExecute(Bitmap result) {
             bmImage.setImageBitmap(result);
         }
